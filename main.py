@@ -1,4 +1,4 @@
-import threading
+import threading as th
 import time as tm
 import random as rd
 
@@ -11,8 +11,8 @@ def sort(array):
     esq = array[:meio]
     dir = array[meio:]
 
-    esq = divide(esq)
-    dir = divide(dir)
+    esq = sort(esq)
+    dir = sort(dir)
 
     return merge(esq, dir)
     
@@ -43,11 +43,11 @@ def sort_threading(array, semaphore):
     esq = array[:meio]
     dir = array[meio:]
 
-    semaforo_esq = threading.Semaphore(0)
-    semaforo_dir = threading.Semaphore(0)
+    semaforo_esq = th.Semaphore(0)
+    semaforo_dir = th.Semaphore(0)
 
-    thread_esq = threading.Thread(target=sort_threading, args=(esq, semaforo_esq))
-    thread_dir = threading.Thread(target=sort_threading, args=(dir, semaforo_dir))
+    thread_esq = th.Thread(target=sort_threading, args=(esq, semaforo_esq))
+    thread_dir = th.Thread(target=sort_threading, args=(dir, semaforo_dir))
 
     thread_esq.start()
     thread_dir.start()
@@ -88,10 +88,10 @@ def metrifica_normal(array):
     return inicial - final
 
 def metrifica_threads(array):
-    semaforo = threading.Semaphore(0)
+    semaforo = th.Semaphore(0)
 
     inicial = tm.time()
-    sort_thread = threading.Thread(target = merge_threading, args=(array, semaforo))
+    sort_thread = th.Thread(target = merge_threading, args=(array, semaforo))
     sort_thread.start()
     semaforo.acquire()
     final = tm.time()
@@ -101,3 +101,8 @@ def metrifica_threads(array):
 def main():
     array = [rd.randint(1, 1000) for _ in range(10000)]
 
+    print(f"O tempo de ordenação sem threads: {metrifica_normal(array.copy())}")
+    print(f"O tempo de execução com multithreading: {metrifica_threads(array.copy())}")
+
+if __name__ == "__main__":
+    main()
