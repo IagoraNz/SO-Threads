@@ -2,7 +2,7 @@ import threading
 import time as tm
 import random as rd
 
-def divide(array):
+def sort(array):
     if len(array) < 1:
         return array
     
@@ -82,7 +82,21 @@ def merge_threading(array, esq, dir, semaforo_esq, semaforo_dir, semaphore):
     semaforo_dir.release()
 
 def metrifica_normal(array):
-    
+    inicial = tm.time()
+    sort(array)
+    final = tm.time()
+    return inicial - final
+
+def metrifica_threads(array):
+    semaforo = threading.Semaphore(0)
+
+    inicial = tm.time()
+    sort_thread = threading.Thread(target = merge_threading, args=(array, semaforo))
+    sort_thread.start()
+    semaforo.acquire()
+    final = tm.time()
+
+    return inicial - final
 
 def main():
     array = [rd.randint(1, 1000) for _ in range(10000)]
