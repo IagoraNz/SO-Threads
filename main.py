@@ -3,7 +3,7 @@ import time as tm
 import random as rd
 
 def sort(array):
-    if len(array) < 1:
+    if len(array) < 2:
         return array
     
     meio = len(array) // 2
@@ -15,7 +15,6 @@ def sort(array):
     dir = sort(dir)
 
     return merge(esq, dir)
-    
 
 def merge(esq, dir):
     array = []
@@ -37,7 +36,8 @@ def merge(esq, dir):
 
 def sort_threading(array, semaphore):
     if len(array) <= 1:
-        return array
+        semaphore.release()
+        return
     
     meio = len(array) // 2
     esq = array[:meio]
@@ -56,8 +56,6 @@ def sort_threading(array, semaphore):
     thread_dir.join()
 
     merge_threading(array, esq, dir, semaforo_esq, semaforo_dir, semaphore)
-
-    semaphore.release()
 
 def merge_threading(array, esq, dir, semaforo_esq, semaforo_dir, semaphore):
     resultado = []
@@ -80,23 +78,23 @@ def merge_threading(array, esq, dir, semaforo_esq, semaforo_dir, semaphore):
 
     semaforo_esq.release()
     semaforo_dir.release()
+    semaphore.release()
 
 def metrifica_normal(array):
     inicial = tm.time()
     sort(array)
     final = tm.time()
-    return inicial - final
+    return final - inicial
 
 def metrifica_threads(array):
     semaforo = th.Semaphore(0)
 
     inicial = tm.time()
-    sort_thread = th.Thread(target = merge_threading, args=(array, semaforo))
-    sort_thread.start()
+    th.Thread(target=sort_threading, args=(array, semaforo)).start()
     semaforo.acquire()
     final = tm.time()
 
-    return inicial - final
+    return final - inicial
 
 def main():
     array = [rd.randint(1, 1000) for _ in range(10000)]
