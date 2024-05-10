@@ -1,106 +1,78 @@
-import threading as th
-import time as tm
-import random as rd
+import time
+import threading
 
-def sort(array):
-    if len(array) < 2:
-        return array
+# Função de merge sort
+def merge_sort(nums):
+    if len(nums) <= 1:
+        return nums
     
-    meio = len(array) // 2
-
-    esq = array[:meio]
-    dir = array[meio:]
-
-    esq = sort(esq)
-    dir = sort(dir)
-
-    return merge(esq, dir)
-
-def merge(esq, dir):
-    array = []
-
-    i, j = 0, 0
-
-    while i < len(esq) and j < len(dir):
-        if esq[i] < dir[j]:
-            array.append(esq[i])
-            i += 1
-        else:
-            array.append(dir[j])
-            j += 1
-
-    array.extend(esq[i:])
-    array.extend(dir[j:])
-
-    return array
-
-def sort_threading(array, semaphore):
-    if len(array) <= 1:
-        semaphore.release()
-        return
+    meio = len(nums) // 2
+    esquerda = merge_sort(nums[:meio])
+    direita = merge_sort(nums[meio:])
     
-    meio = len(array) // 2
-    esq = array[:meio]
-    dir = array[meio:]
+    return merge(esquerda, direita)
 
-    semaforo_esq = th.Semaphore(0)
-    semaforo_dir = th.Semaphore(0)
-
-    thread_esq = th.Thread(target=sort_threading, args=(esq, semaforo_esq))
-    thread_dir = th.Thread(target=sort_threading, args=(dir, semaforo_dir))
-
-    thread_esq.start()
-    thread_dir.start()
-
-    thread_esq.join()
-    thread_dir.join()
-
-    merge_threading(array, esq, dir, semaforo_esq, semaforo_dir, semaphore)
-
-def merge_threading(array, esq, dir, semaforo_esq, semaforo_dir, semaphore):
+# Função auxiliar para mesclar duas listas ordenadas
+def merge(esquerda, direita):
     resultado = []
-
-    i, j = 0, 0
-
-    while i < len(esq) and j < len(dir):
-        if esq[i] < dir[j]:
-            resultado.append(esq[i])
+    i = j = 0
+    
+    while i < len(esquerda) and j < len(direita):
+        if esquerda[i] < direita[j]:
+            resultado.append(esquerda[i])
             i += 1
         else:
-            resultado.append(dir[j])
+            resultado.append(direita[j])
             j += 1
+    
+    resultado.extend(esquerda[i:])
+    resultado.extend(direita[j:])
+    return resultado
 
-    resultado.extend(esq[i:])
-    resultado.extend(dir[j:])
+# Função que será executada por cada thread
+def merge_sort_thread(nums, resultado, semaforo):
+    nums = merge_sort(nums)
+    semaforo.acquire()  # Adquire o semáforo antes de acessar a lista compartilhada
+    resultado.append(nums)
+    semaforo.release()  # Libera o semáforo após o acesso
 
-    for i in range(len(resultado)):
-        array[i] = resultado[i]
+# Versão com multithreading usando semáforo
+def com_multithreading(nums, num_threads=2):
+    inicio = time.time()
+    threads = []
+    resultado = []
+    semaforo = threading.Semaphore()  # Inicializa o semáforo
 
-    semaforo_esq.release()
-    semaforo_dir.release()
-    semaphore.release()
+    # Dividindo a lista de números em partes iguais para cada thread
+    tamanho_parte = len(nums) // num_threads
+    for i in range(num_threads):
+        inicio_parte = i * tamanho_parte
+        fim_parte = (i + 1) * tamanho_parte
+        parte_nums = nums[inicio_parte:fim_parte]
 
-def metrifica_normal(array):
-    inicial = tm.time()
-    sort(array)
-    final = tm.time()
-    return final - inicial
+        # Criando e iniciando a thread
+        thread = threading.Thread(target=merge_sort_thread, args=(parte_nums, resultado, semaforo))
+        thread.start()
+        threads.append(thread)
 
-def metrifica_threads(array):
-    semaforo = th.Semaphore(0)
+    # Aguardando todas as threads terminarem
+    for thread in threads:
+        thread.join()
 
-    inicial = tm.time()
-    th.Thread(target=sort_threading, args=(array, semaforo)).start()
-    semaforo.acquire()
-    final = tm.time()
+    # Realizando a operação de merge nas partes ordenadas
+    resultado = merge(*resultado)
+    
+    fim = time.time()
+    print("Versão com multithreading e semáforo: Tempo:", fim - inicio, "segundos")
 
-    return final - inicial
+# Versão sem multithreading
+def sem_multithreading(nums):
+    inicio = time.time()
+    resultado = merge_sort(nums)
+    fim = time.time()
+    print("Versão sem multithreading: Tempo:", fim - inicio, "segundos")
 
-def main():
-    array = [rd.randint(1, 1000) for _ in range(10000)]
+nums = list(range(1000000, 0, -1))
 
-    print(f"O tempo de ordenação sem threads: {metrifica_normal(array.copy())}")
-    print(f"O tempo de execução com multithreading: {metrifica_threads(array.copy())}")
-
-if __name__ == "__main__":
-    main()
+sem_multithreading(nums)
+com_multithreading(nums)
