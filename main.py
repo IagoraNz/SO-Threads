@@ -1,18 +1,17 @@
 import time
 import threading
+import os
 
-# Função de merge sort
-def merge_sort(nums):
-    if len(nums) <= 1:
-        return nums
+def sort(numeros):
+    if len(numeros) <= 1:
+        return numeros
     
-    meio = len(nums) // 2
-    esquerda = merge_sort(nums[:meio])
-    direita = merge_sort(nums[meio:])
+    meio = len(numeros) // 2
+    esquerda = sort(numeros[:meio])
+    direita = sort(numeros[meio:])
     
     return merge(esquerda, direita)
 
-# Função auxiliar para mesclar duas listas ordenadas
 def merge(esquerda, direita):
     resultado = []
     i = j = 0
@@ -29,50 +28,54 @@ def merge(esquerda, direita):
     resultado.extend(direita[j:])
     return resultado
 
-# Função que será executada por cada thread
-def merge_sort_thread(nums, resultado, semaforo):
-    nums = merge_sort(nums)
-    semaforo.acquire()  # Adquire o semáforo antes de acessar a lista compartilhada
-    resultado.append(nums)
-    semaforo.release()  # Libera o semáforo após o acesso
+def mergesort_thread(numeros, resultado, semaforo):
+    numeros = sort(numeros)
+    semaforo.acquire()
+    resultado.append(numeros)
+    semaforo.release()
 
-# Versão com multithreading usando semáforo
-def com_multithreading(nums, num_threads=2):
+def multithreading(numeros, num_threads=2):
     inicio = time.time()
     threads = []
     resultado = []
-    semaforo = threading.Semaphore()  # Inicializa o semáforo
+    semaforo = threading.Semaphore()
 
-    # Dividindo a lista de números em partes iguais para cada thread
-    tamanho_parte = len(nums) // num_threads
+    tamparte = len(numeros) // num_threads
     for i in range(num_threads):
-        inicio_parte = i * tamanho_parte
-        fim_parte = (i + 1) * tamanho_parte
-        parte_nums = nums[inicio_parte:fim_parte]
+        inicioparte = i * tamparte
+        fimparte = (i + 1) * tamparte
+        partenums = numeros[inicioparte:fimparte]
 
-        # Criando e iniciando a thread
-        thread = threading.Thread(target=merge_sort_thread, args=(parte_nums, resultado, semaforo))
+        thread = threading.Thread(target = mergesort_thread, args = (partenums, resultado, semaforo))
         thread.start()
         threads.append(thread)
 
-    # Aguardando todas as threads terminarem
     for thread in threads:
         thread.join()
 
-    # Realizando a operação de merge nas partes ordenadas
     resultado = merge(*resultado)
     
     fim = time.time()
-    print("Versão com multithreading e semáforo: Tempo:", fim - inicio, "segundos")
+    print(f"\t{fim - inicio:.2f} segundos")
 
-# Versão sem multithreading
-def sem_multithreading(nums):
+def versaonormal(numeros):
     inicio = time.time()
-    resultado = merge_sort(nums)
+    sort(numeros)
     fim = time.time()
-    print("Versão sem multithreading: Tempo:", fim - inicio, "segundos")
+    print(f"\t{fim - inicio:.2f} segundos")
 
-nums = list(range(1000000, 0, -1))
+numeros = list(range(15000000, 0, -1))
 
-sem_multithreading(nums)
-com_multithreading(nums)
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def main():
+    clear()
+    print("\tMERGE SORT E MULTITHREADINGS EM EXECUÇÃO")
+    print("\n\tTempo de execução do merge sort sem multithreading")
+    versaonormal(numeros)
+    print("\n\tTempo de execução do merge sort com multithreading e semaforo")
+    multithreading(numeros)
+
+if __name__ == "__main__":
+    main()
