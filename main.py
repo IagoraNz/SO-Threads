@@ -62,7 +62,7 @@ def multithreading(numeros, num_threads=2):
     resultado = merge(*resultado)
     
     fim = time.time()
-    print(f"\tTempo de execução com multithreading e semáforo: {fim - inicio:.2f} segundos")
+    print(f"\t{fim - inicio:.2f} segundos")
 
 def multithreading_mutex(numeros, num_threads=2):
     inicio = time.time()
@@ -86,13 +86,13 @@ def multithreading_mutex(numeros, num_threads=2):
     resultado = merge(*resultado)
     
     fim = time.time()
-    print(f"\tTempo de execução com multithreading e Mutex: {fim - inicio:.2f} segundos")
+    print(f"\t{fim - inicio:.2f} segundos")
 
 def versaonormal(numeros):
     inicio = time.time()
     sort(numeros)
     fim = time.time()
-    print(f"\tTempo de execução do merge sort sem multithreading: {fim - inicio:.2f} segundos")
+    print(f"\t{fim - inicio:.2f} segundos")
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
