@@ -106,7 +106,7 @@ def main():
     versaonormal(numeros)
     print("\n\tTempo de execução do merge sort com multithreading e semáforo")
     multithreading(numeros)
-    print("\n\tTempo de execução do merge sort com multithreading e Mutex")
+    print("\n\tTempo de execução do merge sort com multithreading e mutex")
     multithreading_mutex(numeros)
 
 if __name__ == "__main__":
