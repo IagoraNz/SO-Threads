@@ -34,6 +34,12 @@ def mergesort_thread(numeros, resultado, semaforo):
     resultado.append(numeros)
     semaforo.release()
 
+def mergesort_mutex(numeros, resultado, lock):
+    numeros = sort(numeros)
+    lock.acquire()
+    resultado.append(numeros)
+    lock.release()
+
 def multithreading(numeros, num_threads=2):
     inicio = time.time()
     threads = []
@@ -46,7 +52,7 @@ def multithreading(numeros, num_threads=2):
         fimparte = (i + 1) * tamparte
         partenums = numeros[inicioparte:fimparte]
 
-        thread = threading.Thread(target = mergesort_thread, args = (partenums, resultado, semaforo))
+        thread = threading.Thread(target=mergesort_thread, args=(partenums, resultado, semaforo))
         thread.start()
         threads.append(thread)
 
@@ -56,26 +62,52 @@ def multithreading(numeros, num_threads=2):
     resultado = merge(*resultado)
     
     fim = time.time()
-    print(f"\t{fim - inicio:.2f} segundos")
+    print(f"\tTempo de execução com multithreading e semáforo: {fim - inicio:.2f} segundos")
+
+def multithreading_mutex(numeros, num_threads=2):
+    inicio = time.time()
+    threads = []
+    resultado = []
+    lock = threading.Lock()
+
+    tamparte = len(numeros) // num_threads
+    for i in range(num_threads):
+        inicioparte = i * tamparte
+        fimparte = (i + 1) * tamparte
+        partenums = numeros[inicioparte:fimparte]
+
+        thread = threading.Thread(target=mergesort_mutex, args=(partenums, resultado, lock))
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
+
+    resultado = merge(*resultado)
+    
+    fim = time.time()
+    print(f"\tTempo de execução com multithreading e Mutex: {fim - inicio:.2f} segundos")
 
 def versaonormal(numeros):
     inicio = time.time()
     sort(numeros)
     fim = time.time()
-    print(f"\t{fim - inicio:.2f} segundos")
-
-numeros = list(range(15000000, 0, -1))
+    print(f"\tTempo de execução do merge sort sem multithreading: {fim - inicio:.2f} segundos")
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
+    print("\n\tGerando a lista de números...")
+    numeros = list(range(15000000, 0, -1))
     clear()
     print("\tMERGE SORT E MULTITHREADINGS EM EXECUÇÃO")
     print("\n\tTempo de execução do merge sort sem multithreading")
     versaonormal(numeros)
-    print("\n\tTempo de execução do merge sort com multithreading e semaforo")
+    print("\n\tTempo de execução do merge sort com multithreading e semáforo")
     multithreading(numeros)
+    print("\n\tTempo de execução do merge sort com multithreading e Mutex")
+    multithreading_mutex(numeros)
 
 if __name__ == "__main__":
     main()
