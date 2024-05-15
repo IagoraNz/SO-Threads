@@ -38,6 +38,7 @@ def sort(numeros):
     meio = len(numeros) // 2
     # Novas listas são criadas, uma para a parte da esquerda e outra para a parte da direita
     esquerda = sort(numeros[:meio]) # Parte da esquerda
+
     direita = sort(numeros[meio:]) # Parte da direita
     
     # As partes ordenadas são mescladas, por meio da função merge()
