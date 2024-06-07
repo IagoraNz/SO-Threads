@@ -14,7 +14,7 @@ Python 3.11.9
 ## :link: Project description
 **Final grade:** 10/10
 
-The developed algorithm is an implementation of the Merge Sort sorting algorithm using advanced operating system concepts, such as multithreading, semaphores and mutex. The objective is to compare the performance of Merge Sort in three different scenarios: without multithreading, with multithreading and semaphore, and with multithreading and mutex.
+The developed algorithm is an implementation of the Merge Sort sorting algorithm using advanced operating system concepts, such as multithreading, semaphores and mutex. The objective is to compare the performance of Merge Sort in three different scenarios: without multithreading, multithreading and semaphore, and with multithreading and mutex.
 
 Firstly, we have Merge Sort without multithreading. This is the basic implementation of the Merge Sort algorithm, which does not use threads. It serves as a baseline to measure performance gains in other versions that use parallelism techniques. In this version, the algorithm follows the traditional divide and conquer flow, where the array is recursively divided into sub-arrays until each sub-array contains only one element, and then combined in ascending order.
 
